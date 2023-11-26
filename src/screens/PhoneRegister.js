@@ -20,11 +20,6 @@ export default function PhoneRegister({ navigation }) {
   const dispatch = useDispatch()
 
 
-  // const sendOtpMutation = useMutation(async () => {
-  //   return await sendOTP(phone)
-  // })
-
-
   const onChangeNum = (text) => {
     if (!text.length) {
       setIsValidPhone(true)

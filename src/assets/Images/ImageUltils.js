@@ -55,8 +55,14 @@ module.exports = {
                 return require('./duongmap.jpg')
             case 'avt4':
                 return require('./rosy.jpg')
-
-
+            case 'buyTicket':
+                return require('./buyTicket.png')
+            case 'buildRoute':
+                return require('./buildRoute.png')
+            case 'avtDriver':
+                return require('./driver.png')
+            case 'runningCar' : 
+                return require('./runningCar.gif')
         }
     }
 }

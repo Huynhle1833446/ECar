@@ -13,7 +13,7 @@ const CARD_WIDTH_SPACING = CARD_WIDTH + 24;
 export default function PopularNews() {
 
     return (
-        <View style={{ flex: 1, marginTop: ScaleUtils.floorModerateScale(20), padding: ScaleUtils.floorModerateScale(10) }}>
+        <View style={{ flex: 1, marginTop: ScaleUtils.floorModerateScale(20), padding: ScaleUtils.floorModerateScale(5) }}>
             <Text style={{ fontSize: 25, fontWeight: "bold" }}>Tin tức nổi bật</Text>
             <View style={{ marginTop: ScaleUtils.floorModerateScale(15) }}>
                 <FlatList

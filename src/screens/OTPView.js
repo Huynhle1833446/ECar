@@ -85,66 +85,6 @@ export default function OTPView({ navigation, route }) {
   }
 
 
-
-  // const getOtpMutation = useMutation(async () => {
-  //   return await verifyOtp(phoneVeri, otpCode)
-  // })
-  // const resendOtpMutation = useMutation(async () => {
-  //   return await sendOTP(phoneVeri)
-  // })
-  // const handleResendOtp = () => {
-  //   resendOtpMutation.mutate()
-  // }
-  // useEffect(() => {
-  //   if (getOtpMutation.isError) {
-  //     Toast.show({
-  //       type: 'invalid',
-  //       props: { message: "Mã OTP không hợp lệ !.Vui lòng thử lại" }
-  //     });
-
-  //   }
-  // }, [getOtpMutation.isError])
-
-  // useEffect(() => {
-  //   if (getOtpMutation.isSuccess) {
-  //     Toast.show({
-  //       type: 'successed',
-  //       props: { message: "Xác minh thành công!" }
-  //     });
-  //     setTimeout(() => {
-  //       navigation.navigate('register', {phoneNumber : phoneVeri})
-  //     }, 1000) 
-
-  //     // navigation.navigate('home')
-  //   }
-  // }, [getOtpMutation.isSuccess])
-
-  // useEffect(() => {
-  //   if (resendOtpMutation.isError) {
-  //     Toast.show({
-  //       type: 'invalid',
-  //       props: { message: "Đã có lỗi xảy ra vui lòng thử lại !" }
-  //     });
-  //   }
-  // }, [resendOtpMutation.isError])
-
-  // useEffect(() => {
-  //   if (resendOtpMutation.isSuccess) {
-  //     Toast.show({
-  //       type: 'successed',
-  //       props: { message: "Đã gửi lại mã thành công! Vui lòng kiểm tra điện thoại." }
-  //     });
-  //     setCountdown(5)
-  //     setIsFinished(false)
-  //     // navigation.navigate('home')
-  //   }
-  // }, [resendOtpMutation.isSuccess])
-
-
-
-
-
-
   return (
     <View style={{ backgroundColor: "white", flex: 1 }}>
       <Header
