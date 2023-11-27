@@ -20,6 +20,7 @@ export default function AccountManagement({ navigation }) {
     const handleLogOut = () => {
         dispatch(logoutUser())
     }
+    
     return (
         <View style={{ backgroundColor: "white", flex: 1 }}>
             {/* <View style={{ flexDirection: "column", alignItems : "center", marginTop : ScaleUtils.floorModerateScale(15) }}>
