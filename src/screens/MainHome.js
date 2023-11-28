@@ -12,8 +12,8 @@ import FastImage from 'react-native-fast-image';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectAuth } from '../features/auth/authSlice';
 import Carousel from 'react-native-snap-carousel';
-import { useGetLocationMutation, useGetTripsMutation,useUpdateTripMutation,useGetTicketBookedMutation } from '../services/ticketApi';
-import { setLocationFrom, setLocationTo, setChosenRoute, setFinishedRoute,setTicketBooked } from '../features/ticket/locationSlice';
+import { useGetLocationMutation, useGetTripsMutation,useUpdateTripMutation,useGetTicketBookedMutation,useGetUserInTripMutation } from '../services/ticketApi';
+import { setLocationFrom, setLocationTo, setChosenRoute, setFinishedRoute,setTicketBooked,setListUserInTrip } from '../features/ticket/locationSlice';
 import Toast from 'react-native-toast-message';
 import PriceFormat from '../common/PriceFormat';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -29,6 +29,7 @@ export default function MainHome({ navigation }) {
   const [getTrips, { data: trips, isError: isErrTrip, isSuccess: isSuccessTrip, error: errTrip }] = useGetTripsMutation()
   const [updateTrip,{ isError : isErrUpdate, isSuccess : isSuccessUpdate, error : errorUpdate}] = useUpdateTripMutation()
   const [getTicketBooked,{data: ticked, isError: isErrTicked, isSuccess: isSuccessTicked, error: errTicked}] = useGetTicketBookedMutation()
+  const [getUserInTrip,{data: userTrip, isError: isErrUserTrip, isSuccess: isSuccessUserTrip, error: errUserTrip}] = useGetUserInTripMutation()
   const dispatch = useDispatch()
 
   const handleBooking = async () => {
@@ -46,6 +47,7 @@ export default function MainHome({ navigation }) {
   const handleTakeTrip = async (route) => {
     setAcceptRoute(route)
     await updateTrip({status : "in_progress", trip_id : route.key})
+    await getUserInTrip({trip_id : route.key})
   }
   const handleValidateRoute = (route) => {
     if (route.total_slot_ticket > 0) {
@@ -127,6 +129,22 @@ export default function MainHome({ navigation }) {
       });
     }
   }, [isSuccessUpdate, isErrUpdate])
+
+  useEffect(() => {
+    if (isSuccessUserTrip) {
+      Toast.show({
+        type: 'successed',
+        props: { message: 'Lấy dữ liệu khách đặt vé thành công !' }
+      });
+      dispatch(setListUserInTrip(userTrip.data['customer']))
+    }
+    if (isErrUserTrip) {
+      Toast.show({
+        type: 'invalid',
+        props: { message: errUserTrip.data.error }
+      });
+    }
+  }, [isSuccessUserTrip, isErrUserTrip])
 
   const _renderItem = ({ item, index }) => {
     return (
