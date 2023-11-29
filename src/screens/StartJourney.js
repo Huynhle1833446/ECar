@@ -8,10 +8,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useUpdateTripMutation,useGetTripsMutation } from '../services/ticketApi';
 import Toast from 'react-native-toast-message';
 import { selectLocation,setAvailableRoute,setFinishedRoute } from '../features/ticket/locationSlice'
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 export default function StartJourney({ navigation }) {
-    const { chosenRoute } = useSelector(selectLocation)
-    const dispatch = useDispatch()
+    const { chosenRoute, listUserInTrip } = useSelector(selectLocation)
     const [updateTrip, { isError: isErrUpdate, isSuccess: isSuccessUpdate, error: errorUpdate }] = useUpdateTripMutation()
     const [getTrips, { data: trips, isError: isErrTrip, isSuccess: isSuccessTrip, error: errTrip }] = useGetTripsMutation()
 
@@ -53,6 +53,34 @@ export default function StartJourney({ navigation }) {
     }, [isSuccessTrip, isErrTrip])
 
 
+    const _renderItem = ({ item, index }) => {
+        return (
+            <View key={index} style={styles.smallBox}>
+                <Text style={{ fontSize: 20, fontWeight: "bold" }}>{item.fullname}</Text>
+                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: ScaleUtils.floorModerateScale(15) }}>
+                    <View style={{ flexDirection: "row", alignItems: "center" }}>
+                        <MaterialCommunityIcons
+                            name={"cellphone"}
+                            size={23}
+                            color="red"
+                            style={{ marginRight: ScaleUtils.floorModerateScale(8) }}
+                        />
+                        <Text style = {{fontSize : 15,fontWeight : "600"}}>{item.phone}</Text>
+                    </View>
+                     <View style={{ flexDirection: "row", alignItems: "center" }}>
+                        <MaterialCommunityIcons
+                            name={"ticket-account"}
+                            size={23}
+                            color="red"
+                            style={{ marginRight: ScaleUtils.floorModerateScale(8) }}
+                        />
+                        <Text style = {{fontSize : 15,fontWeight : "600"}}>{item.ticket_user_buy} vé</Text>
+                    </View>
+                </View>
+            </View>
+
+        )
+    }
     return (
         <View style={{ backgroundColor: "white", flex: 1 }}>
             <Header
@@ -68,6 +96,12 @@ export default function StartJourney({ navigation }) {
                 />
                 <Text style={{ fontSize: 20, fontWeight: "bold" }}>Đang thực hiện chuyến đi ...</Text>
             </View>
+            <FlatList
+                data={listUserInTrip}
+                renderItem={_renderItem}
+                keyExtractor={(item, index) => index.toString()}
+                style={{padding : ScaleUtils.floorModerateScale(15) }}
+            />
             <View
                 style={{
                     position: "absolute",
@@ -101,3 +135,38 @@ export default function StartJourney({ navigation }) {
         </View>
     )
 }
+const styles = StyleSheet.create({
+    logoIcon: {
+      width: ScaleUtils.floorModerateScale(50),
+      height: ScaleUtils.floorModerateScale(50),
+    },
+    containerFunction: {
+      alignItems: 'center',
+      flexDirection: "row",
+      justifyContent: "space-around",
+      marginTop: ScaleUtils.floorModerateScale(20),
+      borderWidth: 1,
+      borderRadius: 5,
+      padding: ScaleUtils.floorModerateScale(10),
+      borderColor: "#D3D3D3",
+    },
+    smallBox: {
+      marginTop: ScaleUtils.floorModerateScale(15),
+      padding: ScaleUtils.floorModerateScale(10),
+      borderWidth: 1,
+      borderRadius: 10
+    },
+    containerModal: {
+      backgroundColor: 'white',
+      padding: 22,
+      justifyContent: 'center',
+      borderRadius: 4,
+      borderColor: 'rgba(0, 0, 0, 0.1)',
+    },
+    btnModal : {
+      backgroundColor : "#FF6260",
+      padding : ScaleUtils.floorModerateScale(10)
+    }
+  
+  })
+  

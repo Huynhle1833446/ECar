@@ -6,7 +6,8 @@ const initialState = {
     chosenRoute: [],
     finishedRoute: [],
     ticketBooked : [],
-    availableRoute : []
+    availableRoute : [],
+    listUserInTrip : []
 }
 const locationSlice = createSlice({
     name: 'location',
@@ -29,11 +30,14 @@ const locationSlice = createSlice({
         },
         setAvailableRoute : (state,action) => {
             state.availableRoute = action.payload
+        },
+        setListUserInTrip : (state,action) => {
+            state.listUserInTrip = action.payload
         }
     }
 })
 
 export const selectLocation = (state) => state.location;
-export const { setLocationFrom, setLocationTo, setChosenRoute, setFinishedRoute,setTicketBooked,setAvailableRoute } = locationSlice.actions
+export const { setLocationFrom, setLocationTo, setChosenRoute, setFinishedRoute,setTicketBooked,setAvailableRoute,setListUserInTrip } = locationSlice.actions
 export default locationSlice.reducer
 
