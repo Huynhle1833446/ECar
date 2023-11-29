@@ -5,16 +5,21 @@ import ImageUltils from '../assets/Images/ImageUltils';
 import ScaleUtils from '../utils/ScaleUtils';
 import FastImage from 'react-native-fast-image';
 import { useDispatch, useSelector } from 'react-redux';
-import { useUpdateTripMutation } from '../services/ticketApi';
+import { useUpdateTripMutation,useGetTripsMutation } from '../services/ticketApi';
 import Toast from 'react-native-toast-message';
-import { selectLocation } from '../features/ticket/locationSlice'
+import { selectLocation,setAvailableRoute,setFinishedRoute } from '../features/ticket/locationSlice'
 
 export default function StartJourney({ navigation }) {
     const { chosenRoute } = useSelector(selectLocation)
+    const dispatch = useDispatch()
     const [updateTrip, { isError: isErrUpdate, isSuccess: isSuccessUpdate, error: errorUpdate }] = useUpdateTripMutation()
+    const [getTrips, { data: trips, isError: isErrTrip, isSuccess: isSuccessTrip, error: errTrip }] = useGetTripsMutation()
 
     const handleCloseTrip = async () => {
         await updateTrip({ status: "finished", trip_id: chosenRoute.key })
+    }
+    const handleGetTrips = async () => {
+        await getTrips()
     }
 
     useEffect(() => {
@@ -23,6 +28,7 @@ export default function StartJourney({ navigation }) {
                 type: 'successed',
                 props: { message: 'Hoàn thành chuyến đi thành công !' }
             });
+            handleGetTrips()
             navigation.navigate('home')
         }
         if (isErrUpdate) {
@@ -32,6 +38,19 @@ export default function StartJourney({ navigation }) {
             });
         }
     }, [isSuccessUpdate, isErrUpdate])
+
+    useEffect(() => {
+        if (isSuccessTrip) {
+            dispatch(setFinishedRoute(trips.data.filter(item => item.status == "finished")))
+            dispatch(setAvailableRoute(trips.data.filter(item => item.status == "new")))
+        }
+        if (isErrTrip) {
+            Toast.show({
+                type: 'invalid',
+                props: { message: errTrip.data.error }
+            });
+        }
+    }, [isSuccessTrip, isErrTrip])
 
 
     return (

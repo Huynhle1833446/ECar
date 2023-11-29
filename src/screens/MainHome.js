@@ -13,18 +13,20 @@ import { useDispatch, useSelector } from 'react-redux';
 import { selectAuth } from '../features/auth/authSlice';
 import Carousel from 'react-native-snap-carousel';
 import { useGetLocationMutation, useGetTripsMutation,useUpdateTripMutation,useGetTicketBookedMutation } from '../services/ticketApi';
-import { setLocationFrom, setLocationTo, setChosenRoute, setFinishedRoute,setTicketBooked } from '../features/ticket/locationSlice';
+import { setLocationFrom, setLocationTo, setChosenRoute, setFinishedRoute,setTicketBooked,setAvailableRoute } from '../features/ticket/locationSlice';
 import Toast from 'react-native-toast-message';
 import PriceFormat from '../common/PriceFormat';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import moment from 'moment';
 import Modal from "react-native-modal";
+import { selectLocation } from '../features/ticket/locationSlice'
 
 export default function MainHome({ navigation }) {
   const { userInfo } = useSelector(selectAuth)
   const [isModal, setIsModal] = useState(false)
   const [acceptRoute,setAcceptRoute] = useState([])
+  const { availableRoute } = useSelector(selectLocation)
   const [getLocation, { data, isError, isSuccess, error }] = useGetLocationMutation()
   const [getTrips, { data: trips, isError: isErrTrip, isSuccess: isSuccessTrip, error: errTrip }] = useGetTripsMutation()
   const [updateTrip,{ isError : isErrUpdate, isSuccess : isSuccessUpdate, error : errorUpdate}] = useUpdateTripMutation()
@@ -76,6 +78,7 @@ export default function MainHome({ navigation }) {
   useEffect(() => {
     if (isSuccessTrip) {
       dispatch(setFinishedRoute(trips.data.filter(item => item.status == "finished")))
+      dispatch(setAvailableRoute(trips.data.filter(item => item.status == "new")))
       Toast.show({
         type: 'successed',
         props: { message: 'Lấy dữ liệu chuyến đi thành công!' }
@@ -202,7 +205,7 @@ export default function MainHome({ navigation }) {
         <View style={{ flex: 1, padding: ScaleUtils.floorModerateScale(10) }}>
           <Text style={{ fontSize: 20, fontWeight: "bold", color: "red" }}>Lịch trình hôm nay của tài xế {userInfo.username}</Text>
           <FlatList
-            data={trips?.data.filter(item => item.status == "new")}
+            data={availableRoute}
             renderItem={_renderItem}
             keyExtractor={(item, index) => index.toString()}
             style={{ marginTop: ScaleUtils.floorModerateScale(15) }}
