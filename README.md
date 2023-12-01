@@ -22,4 +22,4 @@
 
 ## License
 
-MIT license @ [NhatDuong](https://github.com/Huynhle1833446/ECar)
+MIT license @ [HuynhLe](https://github.com/Huynhle1833446/ECar)
