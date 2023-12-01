@@ -14,6 +14,7 @@ export default function StartJourney({ navigation }) {
     const { chosenRoute, listUserInTrip } = useSelector(selectLocation)
     const [updateTrip, { isError: isErrUpdate, isSuccess: isSuccessUpdate, error: errorUpdate }] = useUpdateTripMutation()
     const [getTrips, { data: trips, isError: isErrTrip, isSuccess: isSuccessTrip, error: errTrip }] = useGetTripsMutation()
+    const dispatch = useDispatch()
 
     const handleCloseTrip = async () => {
         await updateTrip({ status: "finished", trip_id: chosenRoute.key })
