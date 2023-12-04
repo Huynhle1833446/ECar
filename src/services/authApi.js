@@ -44,9 +44,18 @@ export const authApi = createApi({
                 }
             }
         }),
+        changePassword : builder.mutation({
+            query : (body) => {
+                return {
+                    url : '/api/auth/change-password',
+                    method : "post",
+                    body
+                }
+            }
+        })
     })
 })
 
-export const {useLoginMutation, useRegisterMutation, useSendOTPMutation, useVerifyOtpMutation} = authApi;
+export const {useLoginMutation, useRegisterMutation, useSendOTPMutation, useVerifyOtpMutation, useChangePasswordMutation} = authApi;
 
 

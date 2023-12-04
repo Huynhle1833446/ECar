@@ -11,6 +11,7 @@ import FastImage from 'react-native-fast-image'
 import { useLoginMutation } from '../services/authApi'
 import { useDispatch } from 'react-redux'
 import {setUser} from '../features/auth/authSlice'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 
@@ -22,7 +23,17 @@ export default function LoginView({ navigation }) {
   const [login, { isLoading, data, isError, isSuccess, error }] = useLoginMutation()
   const dispatch = useDispatch()
 
-
+  const storeData = async (value) => {
+    try {
+      const jsonValue = JSON.stringify(value);
+      await AsyncStorage.setItem('user', jsonValue);
+    } catch (e) {
+      Toast.show({
+        type: 'invalid',
+        props: { message: "Không thể lưu trữ user !" }
+      });   
+     }
+  };
 
 
   const proceedLogin = async () => {
@@ -43,6 +54,7 @@ export default function LoginView({ navigation }) {
         type: 'successed',
         props: { message: "Đăng nhập thành công !" }
       });
+      storeData(data.data.user)
       dispatch(setUser(data.data.user))
     }
     if (isError) {
