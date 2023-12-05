@@ -22,7 +22,16 @@ export const userApi = createApi({
                     body
                 }
             }
-        }) 
+        }),
+        edit: builder.mutation({
+            query : (body) => {
+                return {
+                    url : '/api/user/edit',
+                    method : "post",
+                    body
+                }
+            }
+        })
     })
 })
-export const { useChangePasswordMutation } = userApi
+export const { useChangePasswordMutation, useEditMutation } = userApi

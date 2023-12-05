@@ -17,7 +17,9 @@ const authSlice = createSlice({
                 token: action.payload.token,
                 role: action.payload.role,
                 fullname: action.payload.fullname,
-                id: action.payload.id
+                id: action.payload.id,
+                sex: action.payload.sex,
+                birthday: action.payload.birthday
             }
             return {
                 ...state,

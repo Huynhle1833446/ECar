@@ -280,7 +280,7 @@ export default function MainHome({ navigation }) {
 
   return (
     <View style={{ flex: 1, backgroundColor: "#fff" }}>
-      <HeaderDb name={userInfo['role'] == 'staff' ? `Tài xế ${userInfo.username}` : userInfo.username} />
+      <HeaderDb name={userInfo['role'] == 'staff' ? `Tài xế: ${userInfo.fullname}` : userInfo.fullname} />
       <Modal
         onBackdropPress={() => setIsOpenCreate(false)}
         isVisible={isOpenCreate}
@@ -381,7 +381,7 @@ export default function MainHome({ navigation }) {
       {userInfo['role'] == 'staff'
         ?
         <View style={{ flex: 1, padding: ScaleUtils.floorModerateScale(10) }}>
-          <Text style={{ fontSize: 20, fontWeight: "bold", color: "red" }}>Lịch trình hôm nay của tài xế {userInfo.username}</Text>
+          <Text style={{ fontSize: 20, fontWeight: "bold", color: "red" }}>Lịch trình hôm nay của tài xế {userInfo.fullname}</Text>
           {
             availableRoute.length > 0 ? (
               <FlatList
