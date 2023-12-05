@@ -16,7 +16,8 @@ const authSlice = createSlice({
                 phone: action.payload.phone,
                 token: action.payload.token,
                 role: action.payload.role,
-                fullname: action.payload.fullname
+                fullname: action.payload.fullname,
+                id: action.payload.id
             }
             return {
                 ...state,

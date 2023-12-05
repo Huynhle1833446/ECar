@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react'
-import { View, Text, ScrollView, Image, TouchableOpacity, StyleSheet, FlatList } from 'react-native'
+import { View, Text, ScrollView, Image, TouchableOpacity, StyleSheet, FlatList, KeyboardAvoidingView, TextInput } from 'react-native'
 import HeaderDb from '../components/HeaderDb';
 import ImageUltils from '../assets/Images/ImageUltils';
 import ScaleUtils from '../utils/ScaleUtils';
@@ -12,8 +12,8 @@ import FastImage from 'react-native-fast-image';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectAuth } from '../features/auth/authSlice';
 import Carousel from 'react-native-snap-carousel';
-import { useGetLocationMutation, useGetTripsMutation,useUpdateTripMutation,useGetTicketBookedMutation,useGetUserInTripMutation } from '../services/ticketApi';
-import { setLocationFrom, setLocationTo, setChosenRoute, setFinishedRoute,setTicketBooked,setListUserInTrip,setAvailableRoute } from '../features/ticket/locationSlice';
+import { useGetLocationMutation, useGetTripsMutation, useUpdateTripMutation, useGetTicketBookedMutation, useGetUserInTripMutation, useCreateTripMutation } from '../services/ticketApi';
+import { setLocationFrom, setLocationTo, setChosenRoute, setFinishedRoute, setTicketBooked, setListUserInTrip, setAvailableRoute } from '../features/ticket/locationSlice';
 import Toast from 'react-native-toast-message';
 import PriceFormat from '../common/PriceFormat';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -21,19 +21,30 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import moment from 'moment';
 import Modal from "react-native-modal";
 import { selectLocation } from '../features/ticket/locationSlice'
+import { Dropdown } from 'react-native-element-dropdown';
+
+
 
 export default function MainHome({ navigation }) {
   const { userInfo } = useSelector(selectAuth)
+  const [isOpenCreate, setIsOpenCreate] = React.useState(false);
+  const [stage, setStage] = React.useState(0);
+  const [countSlot, setCountSlot] = React.useState(0);
+  const [dataCreateTrip, setDataCreateTrip] = React.useState([]);
+  const [startAt, setStartAt] = React.useState(moment().format('DD-MM-YYYY HH:mm:ss'));
+  const dateTimeRegex = /^\d{2}-\d{2}-\d{4} \d{2}:\d{2}:\d{2}$/;
+  const [alertError, setAlertError] = React.useState('')
   const [isModal, setIsModal] = useState(false)
-  const [acceptRoute,setAcceptRoute] = useState([])
+  const [acceptRoute, setAcceptRoute] = useState([])
   const { availableRoute } = useSelector(selectLocation)
   const [getLocation, { data, isError, isSuccess, error }] = useGetLocationMutation()
   const [getTrips, { data: trips, isError: isErrTrip, isSuccess: isSuccessTrip, error: errTrip }] = useGetTripsMutation()
-  const [updateTrip,{ isError : isErrUpdate, isSuccess : isSuccessUpdate, error : errorUpdate}] = useUpdateTripMutation()
-  const [getTicketBooked,{data: ticked, isError: isErrTicked, isSuccess: isSuccessTicked, error: errTicked}] = useGetTicketBookedMutation()
-  const [getUserInTrip,{data: userTrip, isError: isErrUserTrip, isSuccess: isSuccessUserTrip, error: errUserTrip}] = useGetUserInTripMutation()
-  const dispatch = useDispatch()
+  const [updateTrip, { isError: isErrUpdate, isSuccess: isSuccessUpdate, error: errorUpdate }] = useUpdateTripMutation()
+  const [getTicketBooked, { data: ticked, isError: isErrTicked, isSuccess: isSuccessTicked, error: errTicked }] = useGetTicketBookedMutation()
+  const [getUserInTrip, { data: userTrip, isError: isErrUserTrip, isSuccess: isSuccessUserTrip, error: errUserTrip }] = useGetUserInTripMutation()
+  const [createTrip, { data: resCreateTrip, isError: isErrCreateTrip, isSuccess: isSuccessCreateTrip, error: errCreateTrip }] = useCreateTripMutation()
 
+  const dispatch = useDispatch()
   const handleBooking = async () => {
     await getLocation({ current: 1, pageSize: 15 })
   }
@@ -46,10 +57,14 @@ export default function MainHome({ navigation }) {
   const formatDate = date => {
     return moment(date).format('DD/MM/YYYY | HH:mm')
   };
+  const handleTurnOnCreate = () => {
+    setIsOpenCreate(true);
+  }
+
   const handleTakeTrip = async (route) => {
     setAcceptRoute(route)
-    await updateTrip({status : "in_progress", trip_id : route.key})
-    await getUserInTrip({trip_id : route.key})
+    await updateTrip({ status: "in_progress", trip_id: route.key })
+    await getUserInTrip({ trip_id: route.key })
   }
   const handleValidateRoute = (route) => {
     if (route.total_slot_ticket > 0) {
@@ -60,7 +75,37 @@ export default function MainHome({ navigation }) {
         props: { message: "Chuyến đi này chưa có khách đặt !" }
       });
     }
-    
+  }
+
+  const check = () => {
+    let flag = true;
+    if(!stage) {
+      flag = false;
+      setAlertError('Vui lòng chọn tuyến xe!')
+    } else if(!countSlot) {
+      flag = false;
+      setAlertError('Vui lòng điền số lượng chỗ ngồi!')
+    } else if(!startAt) {
+      flag = false;
+      setAlertError('Vui lòng điền thời gian khởi hành!')
+    } else if(startAt && !dateTimeRegex.test(startAt)) {
+      flag = false;
+      setAlertError('Vui lòng điền đúng format thời gian khởi hành (dd-mm-yyyy hh:mm:ss)!')
+    }
+    return flag;
+  }
+
+  const handleCreateTrip =  async () => {
+    const bool = check();
+    if(bool) {
+      setAlertError('')
+      await createTrip({
+        stageId: stage,
+        countSlot: countSlot,
+        startTime: startAt,
+        driverId: userInfo.id
+      })
+    } 
   }
 
   useEffect(() => {
@@ -81,6 +126,7 @@ export default function MainHome({ navigation }) {
     if (isSuccessTrip) {
       dispatch(setFinishedRoute(trips.data.filter(item => item.status == "finished")))
       dispatch(setAvailableRoute(trips.data.filter(item => item.status == "new")))
+      setDataCreateTrip(trips?.dataStage)
       Toast.show({
         type: 'successed',
         props: { message: 'Lấy dữ liệu chuyến đi thành công!' }
@@ -93,6 +139,23 @@ export default function MainHome({ navigation }) {
       });
     }
   }, [isSuccessTrip, isErrTrip])
+
+  useEffect(() => {
+    if (isSuccessCreateTrip) {
+      handleGetTrip()
+      setIsOpenCreate(false)
+      Toast.show({
+        type: 'successed',
+        props: { message: 'Đã tạo chuyến đi thành công!' }
+      });
+    }
+    if (isErrCreateTrip) {
+      Toast.show({
+        type: 'invalid',
+        props: { message: errCreateTrip.data.error }
+      });
+    }
+  }, [isSuccessCreateTrip, isErrCreateTrip])
 
   useEffect(() => {
     if (isSuccessTicked) {
@@ -123,7 +186,7 @@ export default function MainHome({ navigation }) {
       setIsModal(false)
       dispatch(setChosenRoute(acceptRoute))
       navigation.navigate('startJourney')
-     
+
     }
     if (isErrUpdate) {
       Toast.show({
@@ -187,30 +250,30 @@ export default function MainHome({ navigation }) {
           <Text>{formatDate(item.stage_created_at)}</Text>
         </View>
         <Modal
-            onBackdropPress={() => setIsModal(false)}
-            isVisible={isModal}
-            backdropOpacity={0.8}
-            animationIn="zoomInDown"
-            animationOut="zoomOutUp"
-            animationInTiming={600}
-            animationOutTiming={600}
-            backdropTransitionInTiming={600}
-            backdropTransitionOutTiming={600}
-          >
-            <View style={styles.containerModal}>
-              <Text style = {{fontSize : 20, fontWeight : "600"}}>Tài xế {userInfo.username} có muốn thực hiện chuyến đi này ?</Text>
-              <View style = {{flexDirection : "row",justifyContent : "space-between",marginTop : ScaleUtils.floorModerateScale(20)}}>
-                <TouchableOpacity style = {[styles.btnModal,{backgroundColor : "green"}]} onPress={() => handleTakeTrip(item)}>
-                  <Text style = {{fontSize : 17, fontWeight : "bold",color : "white"}}>Nhận chuyến</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style = {styles.btnModal} onPress={() => setIsModal(false)}>
-                  <Text style = {{fontSize : 17, fontWeight : "bold",color : "white"}}>Không nhận</Text>
-                </TouchableOpacity>
-              </View>
+          onBackdropPress={() => setIsModal(false)}
+          isVisible={isModal}
+          backdropOpacity={0.8}
+          animationIn="zoomInDown"
+          animationOut="zoomOutUp"
+          animationInTiming={600}
+          animationOutTiming={600}
+          backdropTransitionInTiming={600}
+          backdropTransitionOutTiming={600}
+        >
+          <View style={styles.containerModal}>
+            <Text style={{ fontSize: 20, fontWeight: "600" }}>Tài xế {userInfo.username} có muốn thực hiện chuyến đi này ?</Text>
+            <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: ScaleUtils.floorModerateScale(20) }}>
+              <TouchableOpacity style={[styles.btnModal, { backgroundColor: "green" }]} onPress={() => handleTakeTrip(item)}>
+                <Text style={{ fontSize: 17, fontWeight: "bold", color: "white" }}>Nhận chuyến</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.btnModal} onPress={() => setIsModal(false)}>
+                <Text style={{ fontSize: 17, fontWeight: "bold", color: "white" }}>Không nhận</Text>
+              </TouchableOpacity>
             </View>
-          </Modal>
+          </View>
+        </Modal>
       </TouchableOpacity>
-      
+
     )
   }
 
@@ -218,17 +281,125 @@ export default function MainHome({ navigation }) {
   return (
     <View style={{ flex: 1, backgroundColor: "#fff" }}>
       <HeaderDb name={userInfo['role'] == 'staff' ? `Tài xế ${userInfo.username}` : userInfo.username} />
+      <Modal
+        onBackdropPress={() => setIsOpenCreate(false)}
+        isVisible={isOpenCreate}
+        backdropOpacity={0.8}
+        animationIn="zoomInDown"
+        animationOut="zoomOutUp"
+        animationInTiming={600}
+        animationOutTiming={600}
+        backdropTransitionInTiming={600}
+        backdropTransitionOutTiming={600}
+      >
+        <View style={{
+          backgroundColor: 'white',
+          padding: 22,
+          justifyContent: 'center',
+          borderRadius: 4,
+          borderColor: 'rgba(0, 0, 0, 0.1)'
+        }}>
+          <Text style={{ fontSize: 20, fontWeight: "bold", textAlign: 'center' }}>Tạo chuyến xe</Text>
+          <View style={{ paddingVertical: ScaleUtils.floorModerateScale(20) }}>
+            <KeyboardAvoidingView>
+              <View>
+                <View >
+                  <Dropdown
+                    style={styles.dropdown}
+                    placeholderStyle={[styles.placeholderStyle]}
+                    selectedTextStyle={[styles.selectedTextStyle]}
+                    data={dataCreateTrip.map(item => ({
+                      label: `#${item.key} | ${item.from_location_name} - ${item.to_location_name}`,
+                      value: item.key
+                    }))}
+                    maxHeight={300}
+                    labelField="label"
+                    valueField="value"
+                    placeholder="Chọn tuyến xe"
+                    renderRightIcon={false}
+                    value={stage}
+                    onChange={item => {
+                      setStage(item.value);
+                    }}
+                  />
+                </View>
+                <View style={styles.inputContainer}>
+
+                  <TextInput
+                    autoCapitalize='none'
+                    selectTextOnFocus
+                    underlineColorAndroid="transparent"
+                    keyboardType="numeric"
+                    placeholder='Số lượng ghế'
+                    
+                    value={countSlot}
+                    onChangeText={text => {
+                      setCountSlot(text);
+                    }}
+                    style={styles.inputForm}
+                  />
+                </View>
+
+                <View style={styles.inputContainer}>
+
+                  <TextInput
+                    autoCapitalize='none'
+                    selectTextOnFocus
+                    underlineColorAndroid="transparent"
+                    keyboardType="default"
+                    placeholder='Thời gian xuất phát'
+                    value={startAt}
+                    onChangeText={text => {
+                      setStartAt(text);
+                    }}
+                    style={styles.inputForm}
+                  />
+                </View>
+
+                {
+                  alertError !== '' && (
+                    <View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                      <Text style={{ color: 'red' }}>{alertError}</Text>
+                    </View>
+                  )
+                }
+                <View >
+                  <TouchableOpacity
+                    onPress={() => handleCreateTrip()}
+                  >
+                    <View style={styles.loginButton}>
+                      <Text style={styles.loginButtonText}>Thực hiện</Text>
+                    </View>
+                  </TouchableOpacity>
+                </View>
+
+              </View>
+            </KeyboardAvoidingView>
+          </View>
+        </View>
+      </Modal>
       {userInfo['role'] == 'staff'
         ?
         <View style={{ flex: 1, padding: ScaleUtils.floorModerateScale(10) }}>
           <Text style={{ fontSize: 20, fontWeight: "bold", color: "red" }}>Lịch trình hôm nay của tài xế {userInfo.username}</Text>
-          <FlatList
-            data={availableRoute}
-            renderItem={_renderItem}
-            keyExtractor={(item, index) => index.toString()}
-            style={{ marginTop: ScaleUtils.floorModerateScale(15) }}
-          />
-       
+          {
+            availableRoute.length > 0 ? (
+              <FlatList
+                data={availableRoute}
+                renderItem={_renderItem}
+                keyExtractor={(item, index) => index.toString()}
+                style={{ marginTop: ScaleUtils.floorModerateScale(15) }}
+              />
+            ) : (
+              <View style={{ display: "flex", justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                <TouchableOpacity style={{ backgroundColor: "#E48700", borderRadius: 5, padding: 20, marginTop: ScaleUtils.floorModerateScale(15), width: '100%' }} onPress={handleTurnOnCreate}>
+                  <Text style={{ fontSize: 20, fontWeight: "bold", color: "white", textAlign: "center" }}>Tạo chuyến xe</Text>
+                </TouchableOpacity>
+                <Text>*Bạn chỉ được tạo 1 chuyến xe ở 1 thời điểm nhất định.</Text>
+              </View>
+            )
+          }
+
         </View>
         :
         <ScrollView style={{ flex: 1 }}>
@@ -316,9 +487,67 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     borderColor: 'rgba(0, 0, 0, 0.1)',
   },
-  btnModal : {
-    backgroundColor : "#FF6260",
-    padding : ScaleUtils.floorModerateScale(10)
-  }
-
+  dropdown: {
+    marginBottom: 16,
+    borderWidth: 1,
+    borderBottomColor: 'black',
+    borderRadius: 10,
+    paddingLeft: 10,
+    // height: ScaleUtils.floorModerateScale(40),
+    // width: ScaleUtils.floorModerateScale(120)
+},
+dropdownSeat: {
+    height: ScaleUtils.floorModerateScale(30),
+    width: ScaleUtils.floorModerateScale(50)
+},
+placeholderStyle: {
+    fontSize: 15,
+    fontWeight: "800",
+    color: '#D3D3D3'
+},
+selectedTextStyle: {
+    fontSize: 15,
+    color: "#FF6260",
+    fontWeight: "bold"
+},
+  btnModal: {
+    backgroundColor: "#FF6260",
+    padding: ScaleUtils.floorModerateScale(10)
+  },
+  inputContainer: {
+    marginBottom: 16,
+    borderWidth: 1,
+    borderBottomColor: 'black',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    borderRadius: 10,
+    paddingLeft: 10,
+    alignItems: "center"
+  },
+  inputForm: {
+    height: 40,
+    flex: 1,
+    paddingBottom: 10,
+    color: 'red',
+  },
+  loginButton: {
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: ScaleUtils.floorModerateScale(22),
+    // borderColor: 'white',
+    // borderWidth: 2,
+    backgroundColor: '#E48700',
+    borderRadius: 10,
+  },
+  loginButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 18,
+  },
+  welcomeView: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: ScaleUtils.floorModerateScale(10)
+  },
 })
