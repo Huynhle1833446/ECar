@@ -107,7 +107,7 @@ export default function AccountManagement({ navigation }) {
           await edit({
             fullname,
             phone,
-            birthday,
+            birthday: moment(birthday, 'DD-MM-YYYY').format('YYYY-MM-DD'),
             gender: sex
           })
         } 
@@ -126,7 +126,7 @@ export default function AccountManagement({ navigation }) {
       };
     useEffect(() => {
       setFullname(userInfo.fullname)
-      setBirthday(moment(userInfo.birthday).format('DD-MM-YYYY'))
+      setBirthday(userInfo.birthday)
       setSex(userInfo.sex)
       setPhone(userInfo.phone)
     }, [userInfo])
