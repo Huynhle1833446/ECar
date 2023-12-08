@@ -68,7 +68,14 @@ export default function MainHome({ navigation }) {
   }
   const handleValidateRoute = (route) => {
     if (route.total_slot_ticket > 0) {
-      setIsModal(!isModal)
+      if(route.total_slot_ticket < route.total_slot_trip / 2) {
+        Toast.show({
+          type: 'invalid',
+          props: { message: "Chuyến đi này chưa đủ chỗ để khởi hành!" }
+        });
+      } else {
+        setIsModal(!isModal)
+      }
     } else {
       Toast.show({
         type: 'invalid',
@@ -127,15 +134,15 @@ export default function MainHome({ navigation }) {
       dispatch(setFinishedRoute(trips.data.filter(item => item.status == "finished")))
       dispatch(setAvailableRoute(trips.data.filter(item => item.status == "new")))
       setDataCreateTrip(trips?.dataStage)
-      Toast.show({
-        type: 'successed',
-        props: { message: 'Lấy dữ liệu chuyến đi thành công!' }
-      });
+      // Toast.show({
+      //   type: 'successed',
+      //   props: { message: 'Lấy dữ liệu chuyến đi thành công!' }
+      // });
     }
     if (isErrTrip) {
       Toast.show({
         type: 'invalid',
-        props: { message: errTrip.data.error }
+        props: { message: errTrip?.data?.error || "Đang xảy ra lỗi! Vui lòng thử lại" }
       });
     }
   }, [isSuccessTrip, isErrTrip])
@@ -160,10 +167,10 @@ export default function MainHome({ navigation }) {
   useEffect(() => {
     if (isSuccessTicked) {
       dispatch(setTicketBooked(ticked.data))
-      Toast.show({
-        type: 'successed',
-        props: { message: 'Lấy dữ liệu vé đã đặt thành công !' }
-      });
+      // Toast.show({
+      //   type: 'successed',
+      //   props: { message: 'Lấy dữ liệu vé đã đặt thành công !' }
+      // });
     }
     if (isErrTicked) {
       Toast.show({
@@ -176,8 +183,17 @@ export default function MainHome({ navigation }) {
   useEffect(() => {
     if (userInfo['role'] == "staff") {
       handleGetTrip()
+      setInterval(() => {
+        handleGetTrip()
+      }, 10000);
     } else {
       handleGetTicketBooked()
+      setInterval(() => {
+        handleGetTicketBooked()
+      }, 10000);
+    }
+    return () => {
+      clearInterval()
     }
   }, [userInfo])
 
@@ -198,10 +214,10 @@ export default function MainHome({ navigation }) {
 
   useEffect(() => {
     if (isSuccessUserTrip) {
-      Toast.show({
-        type: 'successed',
-        props: { message: 'Lấy dữ liệu khách đặt vé thành công !' }
-      });
+      // Toast.show({
+      //   type: 'successed',
+      //   props: { message: 'Lấy dữ liệu khách đặt vé thành công !' }
+      // });
       dispatch(setListUserInTrip(userTrip.data['customer']))
     }
     if (isErrUserTrip) {
@@ -227,13 +243,13 @@ export default function MainHome({ navigation }) {
             <Text>{item.total_slot_ticket || 0} vé</Text>
           </View>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <AntDesign
-              name={"clockcircleo"}
+            <MaterialCommunityIcons
+              name={"ticket-account"}
               size={23}
               color="red"
               style={{ marginRight: ScaleUtils.floorModerateScale(8) }}
             />
-            <Text>15 phút</Text>
+            <Text>Chỗ ngồi: {item.total_slot_ticket} / {item.total_slot_trip}</Text>
           </View>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             <AntDesign
@@ -246,8 +262,8 @@ export default function MainHome({ navigation }) {
           </View>
         </View>
         <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: ScaleUtils.floorModerateScale(15) }}>
-          <Text>Thời gian khởi hành</Text>
-          <Text>{formatDate(item.stage_created_at)}</Text>
+          <Text>Thời gian tạo chuyến: </Text>
+          <Text>{formatDate(item.created_at)}</Text>
         </View>
         <Modal
           onBackdropPress={() => setIsModal(false)}

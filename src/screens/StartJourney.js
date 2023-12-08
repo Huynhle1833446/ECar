@@ -48,7 +48,7 @@ export default function StartJourney({ navigation }) {
         if (isErrTrip) {
             Toast.show({
                 type: 'invalid',
-                props: { message: errTrip.data.error }
+                props: { message: errTrip?.data?.error || "Đang xảy ra lỗi! Vui lòng thử lại"}
             });
         }
     }, [isSuccessTrip, isErrTrip])

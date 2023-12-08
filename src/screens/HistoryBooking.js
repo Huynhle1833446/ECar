@@ -52,7 +52,7 @@ export default function HistoryBooking() {
                     </View>
                 </View>
                 <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: ScaleUtils.floorModerateScale(15) }}>
-                    <Text>Thời gian khởi hành</Text>
+                    <Text>Thời gian khởi hành </Text>
                     <Text>{formatDate(item.stage_created_at)}</Text>
                 </View>
                 <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: ScaleUtils.floorModerateScale(5) }}>
@@ -115,7 +115,7 @@ export default function HistoryBooking() {
                 </View>
                 <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: ScaleUtils.floorModerateScale(15) }}>
                     <Text>Thời gian khởi hành</Text>
-                    <Text>{formatDate(item.stage_created_at)}</Text>
+                    <Text>{item.started_at}</Text>
                 </View>
             </View>
 

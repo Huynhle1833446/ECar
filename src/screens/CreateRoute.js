@@ -80,9 +80,9 @@ export default function CreateRoute({ navigation }) {
                             color="red"
                             style={{ marginRight: ScaleUtils.floorModerateScale(8) }}
                         />
-                        <Text>{item.total_slot_trip} chỗ</Text>
+                        <Text>Còn lại {item.slot_remain} chỗ</Text>
                     </View>
-                    <View style={{ flexDirection: "row", alignItems: "center" }}>
+                    {/* <View style={{ flexDirection: "row", alignItems: "center" }}>
                         <AntDesign
                             name={"clockcircleo"}
                             size={20}
@@ -90,7 +90,7 @@ export default function CreateRoute({ navigation }) {
                             style={{ marginRight: ScaleUtils.floorModerateScale(8) }}
                         />
                         <Text>15 phút</Text>
-                    </View>
+                    </View> */}
                     <View style={{ flexDirection: "row", alignItems: "center" }}>
                         <AntDesign
                             name={"creditcard"}
@@ -147,7 +147,7 @@ export default function CreateRoute({ navigation }) {
                 <View style={styles.container}>
                     <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", }}>
                         <View style={{ justifyContent: "flex-start" }}>
-                            <Text style={{ fontSize: 14, fontWeight: "600" }}>Điểm đi</Text>
+                            <Text style={{ fontSize: 14, fontWeight: "600" }}>Điểm đón</Text>
                             <Dropdown
                                 style={styles.dropdown}
                                 placeholderStyle={styles.placeholderStyle}
@@ -159,7 +159,7 @@ export default function CreateRoute({ navigation }) {
                                 maxHeight={300}
                                 labelField="label"
                                 valueField="value"
-                                placeholder="Chọn điểm đi"
+                                placeholder="Chọn điểm đón"
                                 value={valueFrom}
                                 onChange={item => {
                                     setValueFrom(item.value);
@@ -172,7 +172,7 @@ export default function CreateRoute({ navigation }) {
                             size={20}
                             color="#FF6260"
                         />
-                        <View style={{ justifyContent: "flex-end" }}>
+                        {/* <View style={{ justifyContent: "flex-end" }}>
                             <Text style={{ fontSize: 14, fontWeight: "600", textAlign: "right" }}>Điểm đến</Text>
                             <Dropdown
                                 style={styles.dropdown}
@@ -192,7 +192,7 @@ export default function CreateRoute({ navigation }) {
                                     setValueTo(item.value);
                                 }}
                             />
-                        </View>
+                        </View> */}
                     </View>
                     <View style={{ borderTopWidth: 1, marginTop: ScaleUtils.floorModerateScale(20), marginBottom: ScaleUtils.floorModerateScale(20), borderTopColor: "#D3D3D3" }}></View>
                     <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
@@ -208,7 +208,7 @@ export default function CreateRoute({ navigation }) {
                                 style={styles.dropdownSeat}
                                 placeholderStyle={[styles.placeholderStyle, { textAlign: "right" }]}
                                 selectedTextStyle={[styles.selectedTextStyle, { textAlign: "right" }]}
-                                data={Array.from({ length: 6 }, (_, index) => ({
+                                data={Array.from({ length: 20 }, (_, index) => ({
                                     label: (index + 1).toString(),
                                     value: index + 1
                                 }))}
@@ -228,8 +228,8 @@ export default function CreateRoute({ navigation }) {
                 </View>
                 <TouchableOpacity
                     onPress={handleFindTicket}
-                    disabled={(valueFrom && valueTo) != null ? false : true}
-                    style={[styles.btnFind, { backgroundColor: (valueFrom && valueTo) != null ? "#FF6260" : "#D3D3D3" }]}>
+                    disabled={(valueFrom) != null ? false : true}
+                    style={[styles.btnFind, { backgroundColor: (valueFrom) != null ? "#FF6260" : "#D3D3D3" }]}>
                     <Text style={{ color: "white", fontSize: 13, fontWeight: "bold" }}>Tìm tuyến xe</Text>
                 </TouchableOpacity>
             </LinearGradient>
