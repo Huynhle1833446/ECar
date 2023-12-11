@@ -104,7 +104,7 @@ export default function HistoryBooking({navigation}) {
                 </View>
                 <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: ScaleUtils.floorModerateScale(15) }}>
                     <Text>Thời gian lăn bánh </Text>
-                    <Text>{formatDate(item.moved_at)}</Text>
+                    <Text>{item.moved_at ? formatDate(item.moved_at) : "Chưa có"}</Text>
                 </View>
                 <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: ScaleUtils.floorModerateScale(5) }}>
                     <Text>Hoàn thành lúc</Text>
@@ -189,7 +189,7 @@ export default function HistoryBooking({navigation}) {
                 </View>
                 <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: ScaleUtils.floorModerateScale(15) }}>
                     <Text>Thời gian lăn bánh</Text>
-                    <Text>{moment(item.moved_at).format('DD/MM/YYYY | HH:mm')}</Text>
+                    <Text>{item.moved_at ? moment(item.moved_at).format('DD/MM/YYYY | HH:mm') : "Chưa có"}</Text>
                 </View>
             </View>
 

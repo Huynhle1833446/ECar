@@ -55,7 +55,7 @@ export default function AccountManagement({ navigation }) {
     }
 
     const handleOpenModalUpdateInfo = () => {
-        setIsOpenModalUpdateInfo(trưe);
+        setIsOpenModalUpdateInfo(true);
     }
 
     const check = () => {
@@ -199,10 +199,11 @@ export default function AccountManagement({ navigation }) {
             >
                 <View style={{
                     width: '100%',
-                    padding: 2,
+                    padding: 20,
                     justifyContent: 'center',
                     borderRadius: 4,
-                    borderColor: 'rgba(0, 0, 0, 0.1)'
+                    borderColor: 'rgba(0, 0, 0, 0.1)',
+                    backgroundColor: 'white',
                 }}>
                     <Text style={{ fontSize: 20, fontWeight: "bold", textAlign: 'center' }}>Cập nhật thông tin</Text>
                     {/* fullname, birthday, phone, gender */}
@@ -422,7 +423,7 @@ export default function AccountManagement({ navigation }) {
             </LinearGradient>
             <View
                 style={{
-                    
+                    marginTop: 100
                 }}
             >
                 <TouchableOpacity
@@ -431,8 +432,9 @@ export default function AccountManagement({ navigation }) {
                         justifyContent: "center",
                         backgroundColor: "blue",
                         height: 50,
+                        marginBottom: 20
                     }}
-                    onPress={() => handleChangePassword()}
+                    onPress={() => handleOpenModalUpdateInfo()}
                 >
                     <Text
                         style={[
@@ -452,6 +454,8 @@ export default function AccountManagement({ navigation }) {
                         justifyContent: "center",
                         backgroundColor: "#E48700",
                         height: 50,
+                        marginBottom: 20
+
                     }}
                     onPress={() => handleChangePassword()}
                 >
@@ -473,6 +477,8 @@ export default function AccountManagement({ navigation }) {
                         justifyContent: "center",
                         backgroundColor: "#FF6260",
                         height: 50,
+                        marginBottom: 20
+
                     }}
                     onPress={() => handleLogOut()}
                 >
