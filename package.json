@@ -26,6 +26,7 @@
     "react-native-element-dropdown": "viper307/react-native-element-dropdown",
     "react-native-fast-image": "^8.6.3",
     "react-native-gesture-handler": "1.6.1",
+    "react-native-image-zoom-viewer": "^3.0.1",
     "react-native-linear-gradient": "^2.8.3",
     "react-native-modal": "^13.0.1",
     "react-native-paper": "4.7.2",

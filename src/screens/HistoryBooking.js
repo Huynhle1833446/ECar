@@ -102,6 +102,10 @@ export default function HistoryBooking({navigation}) {
                     <Text>Thời gian khởi hành </Text>
                     <Text>{formatDate(item.stage_created_at)}</Text>
                 </View>
+                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: ScaleUtils.floorModerateScale(15) }}>
+                    <Text>Thời gian lăn bánh </Text>
+                    <Text>{formatDate(item.moved_at)}</Text>
+                </View>
                 <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: ScaleUtils.floorModerateScale(5) }}>
                     <Text>Hoàn thành lúc</Text>
                     <Text>{item.finished_at ? formatDate(item.finished_at) : "Chưa có"}</Text>
@@ -172,6 +176,10 @@ export default function HistoryBooking({navigation}) {
                     </View>
                 </View>
                 <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: ScaleUtils.floorModerateScale(15) }}>
+                    <Text style={{color : "blue"}}>Điểm đón</Text>
+                    <Text style={{color : "blue"}}>{item.from_location_name}</Text>
+                </View>
+                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: ScaleUtils.floorModerateScale(15) }}>
                     <Text style={{color : "red", fontWeight: 'bold'}}>Điểm đang dừng</Text>
                     <Text style={{color : "red", fontWeight: 'bold'}}>{item.stop_location_name}</Text>
                 </View>
@@ -179,7 +187,10 @@ export default function HistoryBooking({navigation}) {
                     <Text>Thời gian khởi hành</Text>
                     <Text>{item.started_at}</Text>
                 </View>
-                
+                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: ScaleUtils.floorModerateScale(15) }}>
+                    <Text>Thời gian lăn bánh</Text>
+                    <Text>{moment(item.moved_at).format('DD/MM/YYYY | HH:mm')}</Text>
+                </View>
             </View>
 
         )

@@ -357,9 +357,9 @@ export default function MainHome({ navigation }) {
                     keyboardType="numeric"
                     placeholder='Số lượng ghế'
                     
-                    value={countSlot}
+                    value={countSlot + ""}
                     onChangeText={text => {
-                      setCountSlot(text);
+                      setCountSlot(Number(text));
                     }}
                     style={styles.inputForm}
                   />

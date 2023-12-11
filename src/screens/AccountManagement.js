@@ -26,6 +26,7 @@ export default function AccountManagement({ navigation }) {
 
     const { userInfo } = useSelector(selectAuth);
     const [isOpenModalChangePassword, setIsOpenModalChangePassword] = React.useState(false);
+    const [isOpenModalUpdateInfo, setIsOpenModalUpdateInfo] = React.useState(false);
     const [isSecureTextEntryOld, setIsSecureTextEntryOld] = React.useState(true);
     const [isSecureTextEntryNew, setIsSecureTextEntryNew] = React.useState(true);
     const [isSecureTextEntryNewConfirm, setIsSecureTextEntryNewConfirm] = React.useState(true);
@@ -53,8 +54,8 @@ export default function AccountManagement({ navigation }) {
         setIsOpenModalChangePassword(true);
     }
 
-    const handleCloseModalChangePassword = () => {
-        setIsOpenModalChangePassword(false);
+    const handleOpenModalUpdateInfo = () => {
+        setIsOpenModalUpdateInfo(trưe);
     }
 
     const check = () => {
@@ -153,16 +154,17 @@ export default function AccountManagement({ navigation }) {
 
     useEffect(() => {
         if (isSuccessEdit) {
-            console.log('1')
+           
             storeData({ ...userInfo, fullname, phone, date_of_birth: birthday, gender: sex, birthday, sex })
             dispatch(setUser({...userInfo, fullname, phone, date_of_birth: birthday, gender: sex, birthday, sex}))
-            console.log('2')
+            
             setTimeout(() => {
                 Toast.show({
                     type: 'successed',
                     props: { message: editData.data.msg || "Đã cập nhật thông tin thành công !" }
                 });
             }, 500);
+            setIsOpenModalUpdateInfo(false);
         }
         if (isErrorEdit) {
             setAlertError(errorEdit.data.error);
@@ -184,6 +186,113 @@ export default function AccountManagement({ navigation }) {
                 />
                 <View></View>
             </View> */}
+            <Modal
+                onBackdropPress={() => setIsOpenModalUpdateInfo(false)}
+                isVisible={isOpenModalUpdateInfo}
+                backdropOpacity={0.8}
+                animationIn="zoomInDown"
+                animationOut="zoomOutUp"
+                animationInTiming={600}
+                animationOutTiming={600}
+                backdropTransitionInTiming={600}
+                backdropTransitionOutTiming={600}
+            >
+                <View style={{
+                    width: '100%',
+                    padding: 2,
+                    justifyContent: 'center',
+                    borderRadius: 4,
+                    borderColor: 'rgba(0, 0, 0, 0.1)'
+                }}>
+                    <Text style={{ fontSize: 20, fontWeight: "bold", textAlign: 'center' }}>Cập nhật thông tin</Text>
+                    {/* fullname, birthday, phone, gender */}
+                    <View style={{ paddingVertical: ScaleUtils.floorModerateScale(20) }}>
+                        <KeyboardAvoidingView>
+                            <View>
+                                <View style={styles.inputContainer}>
+                                    <TextInput
+                                        autoCapitalize='none'
+                                        selectTextOnFocus
+                                        underlineColorAndroid="transparent"
+                                        keyboardType="default"
+                                        placeholder='Họ và tên'
+                                        value={fullname}
+                                        onChangeText={text => {
+                                            setFullname(text);
+                                        }}
+                                        style={styles.inputForm}
+                                    />
+                                </View>
+                                <View style={styles.inputContainer}>
+                                    <TextInput
+                                        autoCapitalize='none'
+                                        selectTextOnFocus
+                                        value={birthday}
+                                        onChangeText={text => {
+                                            setBirthday(text)
+                                        }}
+                                        underlineColorAndroid="transparent"
+                                        placeholder='Ngày sinh'
+                                        style={styles.inputForm}
+
+                                    />
+
+                                </View>
+                                <View style={styles.inputContainer}>
+                                    <TextInput
+                                        autoCapitalize='none'
+                                        selectTextOnFocus
+                                        value={phone}
+                                        onChangeText={text => {
+                                            setPhone(text)
+                                        }}
+                                        underlineColorAndroid="transparent"
+                                        placeholder='Số điện thoại'
+                                        style={styles.inputForm}
+                                    />
+                                </View>
+                                <View>
+                                    <Dropdown
+                                        style={styles.dropdown}
+                                        placeholderStyle={[styles.placeholderStyle]}
+                                        selectedTextStyle={[styles.selectedTextStyle]}
+                                        data={[{ vi: 'Nam', en: 'male' }, { vi: 'Nữ', en: 'female' }].map(item => ({
+                                            label: `${item.vi}`,
+                                            value: item.en
+                                        }))}
+                                        maxHeight={300}
+                                        labelField="label"
+                                        valueField="value"
+                                        placeholder="Chọn giới tính"
+                                        renderRightIcon={false}
+                                        value={sex}
+                                        onChange={item => {
+                                            setSex(item.value);
+                                        }}
+                                    />
+                                </View>
+                                {
+                                    alertError2 !== '' && (
+                                        <View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                            <Text style={{ color: 'red' }}>{alertError2}</Text>
+                                        </View>
+                                    )
+                                }
+                                <View >
+                                    <TouchableOpacity
+                                        onPress={handleUpdate}
+                                    >
+                                        <View style={styles.loginButton}>
+                                            <Text style={styles.loginButtonText}>Thay đổi</Text>
+                                        </View>
+                                    </TouchableOpacity>
+                                </View>
+
+                            </View>
+                        </KeyboardAvoidingView>
+                    </View>
+                </View>
+            </Modal>
             <Modal
                 onBackdropPress={() => setIsOpenModalChangePassword(false)}
                 isVisible={isOpenModalChangePassword}
@@ -309,110 +418,34 @@ export default function AccountManagement({ navigation }) {
                 />
                 <Text style={{ fontSize: 25, fontWeight: "bold" }}>{userInfo.fullname}</Text>
                 <Text style={{ fontSize: 15, fontWeight: "600", marginTop: ScaleUtils.floorModerateScale(8) }}>{userInfo.phone}</Text>
-                <View style={{
-                    width: '100%',
-                    padding: 2,
-                    justifyContent: 'center',
-                    borderRadius: 4,
-                    borderColor: 'rgba(0, 0, 0, 0.1)'
-                }}>
-                    <Text style={{ fontSize: 20, fontWeight: "bold", textAlign: 'center' }}>Cập nhật thông tin</Text>
-                    {/* fullname, birthday, phone, gender */}
-                    <View style={{ paddingVertical: ScaleUtils.floorModerateScale(20) }}>
-                        <KeyboardAvoidingView>
-                            <View>
-                                <View style={styles.inputContainer}>
-                                    <TextInput
-                                        autoCapitalize='none'
-                                        selectTextOnFocus
-                                        underlineColorAndroid="transparent"
-                                        keyboardType="default"
-                                        placeholder='Họ và tên'
-                                        value={fullname}
-                                        onChangeText={text => {
-                                            setFullname(text);
-                                        }}
-                                        style={styles.inputForm}
-                                    />
-                                </View>
-                                <View style={styles.inputContainer}>
-                                    <TextInput
-                                        autoCapitalize='none'
-                                        selectTextOnFocus
-                                        value={birthday}
-                                        onChangeText={text => {
-                                            setBirthday(text)
-                                        }}
-                                        underlineColorAndroid="transparent"
-                                        placeholder='Ngày sinh'
-                                        style={styles.inputForm}
-
-                                    />
-
-                                </View>
-                                <View style={styles.inputContainer}>
-                                    <TextInput
-                                        autoCapitalize='none'
-                                        selectTextOnFocus
-                                        value={phone}
-                                        onChangeText={text => {
-                                            setPhone(text)
-                                        }}
-                                        underlineColorAndroid="transparent"
-                                        placeholder='Số điện thoại'
-                                        style={styles.inputForm}
-                                    />
-                                </View>
-                                <View>
-                                    <Dropdown
-                                        style={styles.dropdown}
-                                        placeholderStyle={[styles.placeholderStyle]}
-                                        selectedTextStyle={[styles.selectedTextStyle]}
-                                        data={[{ vi: 'Nam', en: 'male' }, { vi: 'Nữ', en: 'female' }].map(item => ({
-                                            label: `${item.vi}`,
-                                            value: item.en
-                                        }))}
-                                        maxHeight={300}
-                                        labelField="label"
-                                        valueField="value"
-                                        placeholder="Chọn giới tính"
-                                        renderRightIcon={false}
-                                        value={sex}
-                                        onChange={item => {
-                                            setSex(item.value);
-                                        }}
-                                    />
-                                </View>
-                                {
-                                    alertError2 !== '' && (
-                                        <View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                                            <Text style={{ color: 'red' }}>{alertError2}</Text>
-                                        </View>
-                                    )
-                                }
-                                <View >
-                                    <TouchableOpacity
-                                        onPress={handleUpdate}
-                                    >
-                                        <View style={styles.loginButton}>
-                                            <Text style={styles.loginButtonText}>Thay đổi</Text>
-                                        </View>
-                                    </TouchableOpacity>
-                                </View>
-
-                            </View>
-                        </KeyboardAvoidingView>
-                    </View>
-                </View>
+                
             </LinearGradient>
             <View
                 style={{
-                    position: "absolute",
-                    bottom: 0,
-                    left: 0,
-                    right: 0
+                    
                 }}
             >
+                <TouchableOpacity
+                    style={{
+                        alignItems: "center",
+                        justifyContent: "center",
+                        backgroundColor: "blue",
+                        height: 50,
+                    }}
+                    onPress={() => handleChangePassword()}
+                >
+                    <Text
+                        style={[
+                            {
+                                color: 'white',
+                                fontSize: 20,
+                                fontWeight: 'bold',
+                            }
+                        ]}
+                    >
+                        Cập nhật thông tin
+                    </Text>
+                </TouchableOpacity>
                 <TouchableOpacity
                     style={{
                         alignItems: "center",
