@@ -5,6 +5,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import MainHome from '../screens/MainHome';
 import CreateRoute from '../screens/CreateRoute';
 import FindRoute from '../screens/FindRoute';
+import map from '../screens/map';
 import AccountManagement from '../screens/AccountManagement';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
 import ScaleUtils from '../utils/ScaleUtils';
@@ -25,6 +26,7 @@ const MainStack = () => (
         <Stack.Screen options={{ headerShown: false }} name='createRoute' component={CreateRoute} />
         <Stack.Screen options={{ headerShown: false }} name='ticketDetail' component={TicketDetail} />
         <Stack.Screen options={{headerShown : false}} name='startJourney' component={StartJourney}/>
+        <Stack.Screen options={{ headerShown: false }} name='map' component={map} />
     </Stack.Navigator>
 )
 const BottomTabForUser = () => {

@@ -1,6 +1,8 @@
 module.exports = {
     getImageSource(imageName) {
         switch (imageName) {
+            case 'map' :
+                return require('./map.jpg')
             case 'logo':
                 return require('./logo.png');
             case 'elecCar':

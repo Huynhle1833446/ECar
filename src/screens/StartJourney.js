@@ -1,27 +1,69 @@
-import React, { useRef, useEffect } from 'react'
+import React, { useRef, useEffect, useState } from 'react'
 import { View, Text, ScrollView, Image, TouchableOpacity, StyleSheet, FlatList } from 'react-native'
 import Header from '../components/Header'
 import ImageUltils from '../assets/Images/ImageUltils';
 import ScaleUtils from '../utils/ScaleUtils';
 import FastImage from 'react-native-fast-image';
 import { useDispatch, useSelector } from 'react-redux';
-import { useUpdateTripMutation,useGetTripsMutation } from '../services/ticketApi';
+import { useUpdateTripMutation,useGetTripsMutation, useGetLocationMutation, useStopLocationTripMutation } from '../services/ticketApi';
 import Toast from 'react-native-toast-message';
-import { selectLocation,setAvailableRoute,setFinishedRoute } from '../features/ticket/locationSlice'
+import { selectLocation,setAvailableRoute,setFinishedRoute, setLocationFrom, setLocationTo } from '../features/ticket/locationSlice'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { Dropdown } from 'react-native-element-dropdown';
 
 export default function StartJourney({ navigation }) {
-    const { chosenRoute, listUserInTrip } = useSelector(selectLocation)
+    const [stopLocation, setStopLocation] = useState(null)
+    const { chosenRoute, listUserInTrip, locationFrom, locationTo } = useSelector(selectLocation)
     const [updateTrip, { isError: isErrUpdate, isSuccess: isSuccessUpdate, error: errorUpdate }] = useUpdateTripMutation()
     const [getTrips, { data: trips, isError: isErrTrip, isSuccess: isSuccessTrip, error: errTrip }] = useGetTripsMutation()
-    const dispatch = useDispatch()
+    const [getLocation, { data, isError, isSuccess, error }] = useGetLocationMutation()
+    const [stopLocationTrip, {data: dataStop, isError: isErrorStop, isSuccess: isSuccessStop, error: errorStop}] = useStopLocationTripMutation()
+    const [arrMapping, setArrMapping] = useState([])
 
+    const dispatch = useDispatch()
+    
+    const handleBooking = async () => {
+        await getLocation({ current: 1, pageSize: 15 })
+      }
     const handleCloseTrip = async () => {
         await updateTrip({ status: "finished", trip_id: chosenRoute.key })
     }
     const handleGetTrips = async () => {
         await getTrips()
     }
+
+    const handleStop = async () => {
+        await stopLocationTrip({location_id: stopLocation.value, trip_id: chosenRoute.key})
+    }
+
+    useEffect(() => {
+        if (isSuccessStop) {
+          Toast.show({
+            type: 'successed',
+            props: { message: dataStop.data?.msg || 'Đã dừng chuyến !' }
+          });
+          handleGetTrips()
+        }
+        if (isErrorStop) {
+          Toast.show({
+            type: 'invalid',
+            props: { message: errorStop.data.error }
+          });
+        }
+      }, [isSuccessStop, isErrorStop])
+
+    useEffect(() => {
+        if (isSuccess) {
+          dispatch(setLocationFrom(data.data.data.filter(item => item.type == "from")))
+          dispatch(setLocationTo(data.data.data.filter(item => item.type == "to")))
+        }
+        if (isError) {
+          Toast.show({
+            type: 'invalid',
+            props: { message: error.data.error }
+          });
+        }
+      }, [isSuccess, isError])
 
     useEffect(() => {
         if (isSuccessUpdate) {
@@ -52,6 +94,28 @@ export default function StartJourney({ navigation }) {
             });
         }
     }, [isSuccessTrip, isErrTrip])
+
+
+    useEffect(() => {
+        handleBooking()
+    }, [])
+
+useEffect(() => {
+    setArrMapping([
+        ...locationFrom,
+        ...locationTo
+    ])
+
+    if(chosenRoute.stop_location_id) {
+        const findItem = arrMapping.find(item => item.key == chosenRoute.stop_location_id)
+        if(findItem) {
+            setStopLocation({
+                label: findItem.vi_name,
+                value: findItem.key
+            })
+        }
+      }
+}, [locationFrom, locationTo, chosenRoute])
 
 
     const _renderItem = ({ item, index }) => {
@@ -97,6 +161,48 @@ export default function StartJourney({ navigation }) {
                 />
                 <Text style={{ fontSize: 20, fontWeight: "bold" }}>Đang thực hiện chuyến đi ...</Text>
             </View>
+            <View style={{padding: ScaleUtils.floorModerateScale(15), borderBottomColor: 'black', borderBottomWidth: 2, display: 'flex'}}>
+                  <Dropdown
+                    style={styles.dropdown}
+                    placeholderStyle={[styles.placeholderStyle]}
+                    selectedTextStyle={[styles.selectedTextStyle]}
+                    data={arrMapping.map(item => ({
+                      label: `${item.vi_name}`,
+                      value: item.key
+                    }))}
+                    maxHeight={300}
+                    labelField="label"
+                    valueField="value"
+                    placeholder="Chọn điểm dừng"
+                    renderRightIcon={false}
+                    value={stopLocation}
+                    onChange={item => {
+                      setStopLocation(item);
+                    }}
+                  />
+                <TouchableOpacity onPress={handleStop}>
+                    <View
+                        style={{
+                            alignItems: "center",
+                            justifyContent: "center",
+                            backgroundColor: "red",
+                            height: 50,
+                        }}
+                    >
+                        <Text
+                            style={[
+                                {
+                                    color: 'white',
+                                    fontSize: 20,
+                                    fontWeight: 'bold',
+                                }
+                            ]}
+                        >
+                            Dừng
+                        </Text>
+                    </View>
+                </TouchableOpacity>
+                </View>
             <FlatList
                 data={listUserInTrip}
                 renderItem={_renderItem}
@@ -137,6 +243,17 @@ export default function StartJourney({ navigation }) {
     )
 }
 const styles = StyleSheet.create({
+    dropdown: {
+        marginBottom: 16,
+        borderWidth: 1,
+        borderBottomColor: 'black',
+        borderRadius: 10,
+        paddingLeft: 10,
+    },
+    dropdownSeat: {
+        height: ScaleUtils.floorModerateScale(30),
+        width: ScaleUtils.floorModerateScale(50)
+    },
     logoIcon: {
       width: ScaleUtils.floorModerateScale(50),
       height: ScaleUtils.floorModerateScale(50),

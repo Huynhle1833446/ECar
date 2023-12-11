@@ -48,6 +48,10 @@ export default function MainHome({ navigation }) {
   const handleBooking = async () => {
     await getLocation({ current: 1, pageSize: 15 })
   }
+
+  const handleGoToMap = () => {
+    navigation.navigate('map')
+  }
   const handleGetTrip = async () => {
     await getTrips()
   }
@@ -110,7 +114,8 @@ export default function MainHome({ navigation }) {
         stageId: stage,
         countSlot: countSlot,
         startTime: startAt,
-        driverId: userInfo.id
+        driverId: userInfo.id,
+        flatform: 'mobile'
       })
     } 
   }
@@ -124,14 +129,14 @@ export default function MainHome({ navigation }) {
     if (isError) {
       Toast.show({
         type: 'invalid',
-        props: { message: error.data.error }
+        props: { message: error?.data?.error || "Đang xảy ra lỗi!"}
       });
     }
   }, [isSuccess, isError])
 
   useEffect(() => {
     if (isSuccessTrip) {
-      dispatch(setFinishedRoute(trips.data.filter(item => item.status == "finished")))
+      dispatch(setFinishedRoute(trips.data.filter(item => item.status != "new")))
       dispatch(setAvailableRoute(trips.data.filter(item => item.status == "new")))
       setDataCreateTrip(trips?.dataStage)
       // Toast.show({
@@ -159,7 +164,7 @@ export default function MainHome({ navigation }) {
     if (isErrCreateTrip) {
       Toast.show({
         type: 'invalid',
-        props: { message: errCreateTrip.data.error }
+        props: { message: errCreateTrip.data.error || "Đang xảy ra lỗi! " }
       });
     }
   }, [isSuccessCreateTrip, isErrCreateTrip])
@@ -249,7 +254,7 @@ export default function MainHome({ navigation }) {
               color="red"
               style={{ marginRight: ScaleUtils.floorModerateScale(8) }}
             />
-            <Text>Chỗ ngồi: {item.total_slot_ticket} / {item.total_slot_trip}</Text>
+            <Text>Chỗ ngồi: {item.total_slot_ticket || 0} / {item.total_slot_trip}</Text>
           </View>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             <AntDesign
@@ -264,6 +269,10 @@ export default function MainHome({ navigation }) {
         <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: ScaleUtils.floorModerateScale(15) }}>
           <Text>Thời gian tạo chuyến: </Text>
           <Text>{formatDate(item.created_at)}</Text>
+        </View>
+        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: ScaleUtils.floorModerateScale(15) }}>
+          <Text>Thời gian khởi hành: </Text>
+          <Text>{formatDate(item.started_at)}</Text>
         </View>
         <Modal
           onBackdropPress={() => setIsModal(false)}
@@ -451,6 +460,17 @@ export default function MainHome({ navigation }) {
                   resizeMode='contain'
                 />
                 <Text style={{ fontSize: 13, fontWeight: "bold", marginTop: ScaleUtils.floorModerateScale(5) }}>Mua vé xe</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={handleGoToMap}
+                style={{ alignItems: "center", flexDirection: "column" }}>
+                <FastImage
+                  style={styles.logoIcon}
+                  source={ImageUltils.getImageSource("map")}
+                  resizeMode='contain'
+                />
+                <Text style={{ fontSize: 13, fontWeight: "bold", marginTop: ScaleUtils.floorModerateScale(5) }}>Xem bản đồ</Text>
               </TouchableOpacity>
               {/* <TouchableOpacity
                 onPress={() => navigation.navigate("findRoute")}

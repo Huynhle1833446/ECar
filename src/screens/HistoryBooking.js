@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react'
+import React, { useRef, useEffect, useState } from 'react'
 import { View, Text, ScrollView, Image, TouchableOpacity, StyleSheet, FlatList } from 'react-native'
 import Header from '../components/Header'
 import PriceFormat from '../common/PriceFormat';
@@ -8,19 +8,62 @@ import moment from 'moment';
 import ScaleUtils from '../utils/ScaleUtils';
 import FastImage from 'react-native-fast-image';
 import { useDispatch, useSelector } from 'react-redux';
-import { useUpdateTripMutation } from '../services/ticketApi';
+import { useUpdateTripMutation, useGetTicketBookedMutation, useGetUserInTripMutation } from '../services/ticketApi';
 import Toast from 'react-native-toast-message';
-import { selectLocation } from '../features/ticket/locationSlice'
+import { selectLocation, setChosenRoute, setListUserInTrip } from '../features/ticket/locationSlice'
 import { selectAuth } from '../features/auth/authSlice';
 
-export default function HistoryBooking() {
-    const { finishedRoute, ticketBooked } = useSelector(selectLocation)
+export default function HistoryBooking({navigation}) {
+    const { finishedRoute, ticketBooked, availableRoute } = useSelector(selectLocation)
     const { userInfo } = useSelector(selectAuth)
+    const dispatch = useDispatch()
+  const [acceptRoute, setAcceptRoute] = useState([])
+  const [updateTrip, { isError: isErrUpdate, isSuccess: isSuccessUpdate, error: errorUpdate }] = useUpdateTripMutation()
+  const [getUserInTrip, { data: userTrip, isError: isErrUserTrip, isSuccess: isSuccessUserTrip, error: errUserTrip }] = useGetUserInTripMutation()
 
+    const handleTakeTrip = async (route) => {
+        if(route.status ==='in_progress') {
+            setAcceptRoute(route)
+            // await updateTrip({ status: "in_progress", trip_id: route.key })
+            await getUserInTrip({ trip_id: route.key })
+        } else {
+            Toast.show({
+                type: 'invalid',
+                props: { message: 'Chuyến đi này đã hoàn thành !' }
+            })
+        }
+      }
+      useEffect(() => {
+        if (isSuccessUpdate) {
+          dispatch(setChosenRoute(acceptRoute))
+          navigation.navigate('startJourney')
+    
+        }
+        if (isErrUpdate) {
+          Toast.show({
+            type: 'invalid',
+            props: { message: errorUpdate.data.error }
+          });
+        }
+      }, [isSuccessUpdate, isErrUpdate])
+
+      useEffect(() => {
+        if (isSuccessUserTrip) {
+          dispatch(setListUserInTrip(userTrip.data['customer']))
+          dispatch(setChosenRoute(acceptRoute))
+          navigation.navigate('startJourney')
+        }
+        if (isErrUserTrip) {
+          Toast.show({
+            type: 'invalid',
+            props: { message: errUserTrip.data.error }
+          });
+        }
+      }, [isSuccessUserTrip, isErrUserTrip])
 
     const _renderItem = ({ item, index }) => {
         return (
-            <View key={index} style={styles.smallBox}>
+            <TouchableOpacity key={index} style={styles.smallBox} onPress={() => handleTakeTrip(item)}>
                 <Text style={{ fontSize: 15, fontWeight: "bold" }}>{item.from_location_name} - {item.to_location_name}</Text>
                 <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: ScaleUtils.floorModerateScale(15) }}>
                     <View style={{ flexDirection: "row", alignItems: "center" }}>
@@ -39,7 +82,7 @@ export default function HistoryBooking() {
                             color="red"
                             style={{ marginRight: ScaleUtils.floorModerateScale(5) }}
                         />
-                        <Text>{moment.utc(moment.duration(moment(item.finished_at).diff(moment(item.stage_created_at))).asMinutes() * 60 * 1000).format("HH:mm")}</Text>
+                        <Text>{item.finished_at ? moment.utc(moment.duration(moment(item.finished_at).diff(moment(item.stage_created_at))).asMinutes() * 60 * 1000).format("HH:mm") : "Chưa có"}</Text>
                     </View>
                     <View style={{ flexDirection: "row", alignItems: "center" }}>
                         <AntDesign
@@ -52,21 +95,36 @@ export default function HistoryBooking() {
                     </View>
                 </View>
                 <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: ScaleUtils.floorModerateScale(15) }}>
+                    <Text>Trạng thái </Text>
+                    <Text>{viStatus(item.status)}</Text>
+                </View>
+                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: ScaleUtils.floorModerateScale(15) }}>
                     <Text>Thời gian khởi hành </Text>
                     <Text>{formatDate(item.stage_created_at)}</Text>
                 </View>
                 <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: ScaleUtils.floorModerateScale(5) }}>
                     <Text>Hoàn thành lúc</Text>
-                    <Text>{formatDate(item.finished_at)}</Text>
+                    <Text>{item.finished_at ? formatDate(item.finished_at) : "Chưa có"}</Text>
                 </View>
-            </View>
+            </TouchableOpacity>
 
         )
+    }
+    const viStatus = (status)=> {
+        switch (status) {
+            case 'in_progress':
+                return "Đang thực hiện"
+                case 'finished':
+                    return "Đã xong"
+            default:
+                return 'Đã huỷ'
+        }
     }
     const formatDate = date => {
         return moment(date).format('DD/MM/YYYY | HH:mm')
     };
     const _renderTicked = ({ item, index }) => {
+        console.log("🚀 ~ file: HistoryBooking.js:127 ~ HistoryBooking ~ item:", item)
         return (
             <View key={index} style={styles.smallBox}>
                 <Text style={{ fontSize: 15, fontWeight: "bold",textAlign : "center" }}>{item.from_location_name} - {item.to_location_name}</Text>
@@ -114,9 +172,14 @@ export default function HistoryBooking() {
                     </View>
                 </View>
                 <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: ScaleUtils.floorModerateScale(15) }}>
+                    <Text style={{color : "red", fontWeight: 'bold'}}>Điểm đang dừng</Text>
+                    <Text style={{color : "red", fontWeight: 'bold'}}>{item.stop_location_name}</Text>
+                </View>
+                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: ScaleUtils.floorModerateScale(15) }}>
                     <Text>Thời gian khởi hành</Text>
                     <Text>{item.started_at}</Text>
                 </View>
+                
             </View>
 
         )

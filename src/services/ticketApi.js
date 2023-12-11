@@ -85,7 +85,16 @@ export const ticketApi = createApi({
                     body
                 }
             }
+        }),
+        stopLocationTrip: builder.mutation({
+            query: (body) => {
+                return {
+                    url: '/api/trip/stop/location',
+                    method: "post",
+                    body
+                }
+            }
         })
     })
 })
-export const { useGetLocationMutation,useGetRouteMutation,useBookingTicketMutation,useGetTripsMutation,useUpdateTripMutation,useGetTicketBookedMutation,useGetUserInTripMutation, useCreateTripMutation } = ticketApi
+export const { useGetLocationMutation,useGetRouteMutation,useBookingTicketMutation,useGetTripsMutation,useUpdateTripMutation,useGetTicketBookedMutation,useGetUserInTripMutation, useCreateTripMutation, useStopLocationTripMutation } = ticketApi
