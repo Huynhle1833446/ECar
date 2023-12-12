@@ -77,6 +77,15 @@ export const ticketApi = createApi({
                 }
             }
         }),
+        deleteTicket : builder.mutation({
+            query : (body) => {
+                return {
+                    url : '/api/ticket/delete',
+                    method : "post",
+                    body
+                }
+            }
+        }),
         createTrip: builder.mutation({
             query: (body) => {
                 return {
@@ -97,4 +106,4 @@ export const ticketApi = createApi({
         })
     })
 })
-export const { useGetLocationMutation,useGetRouteMutation,useBookingTicketMutation,useGetTripsMutation,useUpdateTripMutation,useGetTicketBookedMutation,useGetUserInTripMutation, useCreateTripMutation, useStopLocationTripMutation } = ticketApi
+export const { useGetLocationMutation,useGetRouteMutation,useBookingTicketMutation,useGetTripsMutation,useUpdateTripMutation,useGetTicketBookedMutation,useGetUserInTripMutation, useCreateTripMutation, useStopLocationTripMutation, useDeleteTicketMutation } = ticketApi

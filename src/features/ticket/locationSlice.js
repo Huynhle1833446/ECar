@@ -28,6 +28,9 @@ const locationSlice = createSlice({
         setTicketBooked : (state,action) => {
             state.ticketBooked = action.payload
         },
+        removeTicket: (state,action) => {
+          state.ticketBooked = state.ticketBooked.filter(item => item.ticket_id !== action.payload)  
+        },
         setAvailableRoute : (state,action) => {
             state.availableRoute = action.payload
         },
@@ -38,6 +41,6 @@ const locationSlice = createSlice({
 })
 
 export const selectLocation = (state) => state.location;
-export const { setLocationFrom, setLocationTo, setChosenRoute, setFinishedRoute,setTicketBooked,setAvailableRoute,setListUserInTrip } = locationSlice.actions
+export const { setLocationFrom, setLocationTo, setChosenRoute, setFinishedRoute,setTicketBooked,setAvailableRoute,setListUserInTrip, removeTicket } = locationSlice.actions
 export default locationSlice.reducer
 

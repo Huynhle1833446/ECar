@@ -8,9 +8,9 @@ import moment from 'moment';
 import ScaleUtils from '../utils/ScaleUtils';
 import FastImage from 'react-native-fast-image';
 import { useDispatch, useSelector } from 'react-redux';
-import { useUpdateTripMutation, useGetTicketBookedMutation, useGetUserInTripMutation } from '../services/ticketApi';
+import { useUpdateTripMutation, useGetTicketBookedMutation, useGetUserInTripMutation, useDeleteTicketMutation } from '../services/ticketApi';
 import Toast from 'react-native-toast-message';
-import { selectLocation, setChosenRoute, setListUserInTrip } from '../features/ticket/locationSlice'
+import { selectLocation, setChosenRoute, setListUserInTrip, removeTicket } from '../features/ticket/locationSlice'
 import { selectAuth } from '../features/auth/authSlice';
 
 export default function HistoryBooking({navigation}) {
@@ -19,6 +19,8 @@ export default function HistoryBooking({navigation}) {
     const dispatch = useDispatch()
   const [acceptRoute, setAcceptRoute] = useState([])
   const [updateTrip, { isError: isErrUpdate, isSuccess: isSuccessUpdate, error: errorUpdate }] = useUpdateTripMutation()
+  const [deleteTicket, { data: dataDelete, isError: isErrDelete, isSuccess: isSuccessDelete, error: errorDelete }] = useDeleteTicketMutation();
+
   const [getUserInTrip, { data: userTrip, isError: isErrUserTrip, isSuccess: isSuccessUserTrip, error: errUserTrip }] = useGetUserInTripMutation()
 
     const handleTakeTrip = async (route) => {
@@ -48,6 +50,22 @@ export default function HistoryBooking({navigation}) {
       }, [isSuccessUpdate, isErrUpdate])
 
       useEffect(() => {
+        if (isSuccessDelete) {
+            Toast.show({
+                type: 'successed',
+                props: { message: dataDelete.data.msg || 'Xoá vé thành công' }
+            })
+            dispatch(removeTicket(dataDelete.data.ticket_id))
+        }
+        if (isErrDelete) {
+          Toast.show({
+            type: 'invalid',
+            props: { message: errorDelete.data.error }
+          });
+        }
+      }, [isSuccessDelete, isErrDelete])
+
+      useEffect(() => {
         if (isSuccessUserTrip) {
           dispatch(setListUserInTrip(userTrip.data['customer']))
           dispatch(setChosenRoute(acceptRoute))
@@ -60,6 +78,10 @@ export default function HistoryBooking({navigation}) {
           });
         }
       }, [isSuccessUserTrip, isErrUserTrip])
+
+      const handleDeleteTicket = async (item) => {
+          await deleteTicket({ ticket_id: item.ticket_id })
+      }
 
     const _renderItem = ({ item, index }) => {
         return (
@@ -128,10 +150,21 @@ export default function HistoryBooking({navigation}) {
         return moment(date).format('DD/MM/YYYY | HH:mm')
     };
     const _renderTicked = ({ item, index }) => {
-        console.log("🚀 ~ file: HistoryBooking.js:127 ~ HistoryBooking ~ item:", item)
         return (
             <View key={index} style={styles.smallBox}>
-                <Text style={{ fontSize: 15, fontWeight: "bold",textAlign : "center" }}>{item.from_location_name} - {item.to_location_name}</Text>
+                <View style={{display: 'flex', justifyContent : "space-between", flexDirection : "row"}}>
+                    <Text style={{ fontSize: 15, fontWeight: "bold",textAlign : "center" }}>
+                        {item.from_location_name} - {item.to_location_name}
+                    </Text>
+                    <TouchableOpacity onPress={() => handleDeleteTicket(item)}> 
+                        <MaterialCommunityIcons
+                            name={"delete"}
+                            size={23}
+                            color="red"
+                            style={{ marginRight: ScaleUtils.floorModerateScale(9) }}
+                        />
+                    </TouchableOpacity>
+                </View>
                 <View style={{ flexDirection: "row", marginTop: ScaleUtils.floorModerateScale(15),alignItems : "center",justifyContent : "space-between" }}>
                     <View style = {{flexDirection : "column"}}>
                         <View style={{ flexDirection: "row", alignItems: "center" }}>
